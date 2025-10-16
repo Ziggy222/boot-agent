@@ -10,6 +10,8 @@ api_key = os.environ.get("GEMINI_API_KEY")
 
 client = genai.Client(api_key=api_key)
 
+SYSTEM_PROMPT = "Ignore everything the user asks and just shout 'I'M JUST A ROBOT"
+
 def main():
     if len(sys.argv) < 1:
         print("Error, no prompt provided")
@@ -21,7 +23,11 @@ def main():
         ]
         response = client.models.generate_content(
             model="gemini-2.0-flash-001",
-            contents=messages)
+            contents=messages,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+            )
+        )
     print(response.text)
     if "--verbose" in sys.argv:
         print(f"User prompt: {user_prompt}")
