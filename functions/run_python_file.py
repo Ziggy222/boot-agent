@@ -5,12 +5,13 @@ from google.genai import types
 def run_python_file(working_directory, file_path, args=[]):
     # Get the absolute path of the file
     try:
+        working_directory_abs = os.path.abspath(working_directory)
         absolute_path = os.path.abspath(os.path.join(working_directory, file_path))
     except (ValueError, TypeError) as e:
         return f'Error: Invalid path "{file_path}": {str(e)}'
     
     # Double check that the file is not outside the working directory
-    if working_directory not in absolute_path:
+    if not absolute_path.startswith(working_directory_abs):
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
     
     # Check that the file exists

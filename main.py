@@ -7,6 +7,7 @@ from functions.get_files_info import schema_get_files_info
 from functions.get_file_content import schema_get_file_content
 from functions.write_file import schema_write_file
 from functions.run_python_file import schema_run_python_file
+from functions.call_function import call_function
 
 import sys
 
@@ -56,19 +57,15 @@ def main():
                 tools=[available_functions],
             )
         )
-    output_string = ""
+    output_string = ""    
     for call in response.function_calls:
-        if call.args is not None:
-            output_string += f"Calling function: {call.name}({call.args})\n"
+        function_response = call_function(call, verbose=("--verbose" in sys.argv))
+        # Check that function response has .parts[0].function_response.response
+        if function_response.parts[0].function_response.response is not None:
+            output_string += f"-> {function_response.parts[0].function_response.response}\n"
         else:
-            output_string += f"Calling function: {call.name}()\n"
-    if response.text is not None:
-        output_string += str(response.text)
+            output_string += f"-> Error: No response from function {call.name}\n"
     print(output_string)
-    if "--verbose" in sys.argv:
-        print(f"User prompt: {user_prompt}")
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
 if __name__ == "__main__":
     main()
